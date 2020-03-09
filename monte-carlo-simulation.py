@@ -10,5 +10,5 @@ if __name__ == '__main__':
     MODIFIED = True
 
     while MODIFIED:
-        MODIFIED = SYSTEM.simulate().next()
+        MODIFIED = next(SYSTEM.simulate())
         print(SYSTEM)
