@@ -2,11 +2,11 @@ import random
 
 
 class System:
-    def __init__(self, l, dim):
-        self.n = l ** dim
+    def __init__(self, el_in_dim, dim):
+        self.n = el_in_dim ** dim
         self.dim = dim
-        self.l = l
-        self.system = self.generate_system(l, dim)
+        self.el_in_dim = el_in_dim
+        self.system = self.generate_system(el_in_dim, dim)
 
     @staticmethod
     def generate_system(l, dim):
@@ -15,20 +15,20 @@ class System:
         return [System.generate_system(l, dim - 1) for _ in range(l)]
 
     def simulate(self):
-        def get_neighbours(coords):
+        def get_neighbours(coordinates):
             res = []
-            for coord in range(len(coords)):
-                state = coords[coord]
-                if state + 1 < len(coords):
-                    res.append(coords[:coord] + [state + 1] + coords[coord+1:])
+            for coord in range(len(coordinates)):
+                state = coordinates[coord]
+                if state + 1 < len(coordinates):
+                    res.append(coordinates[:coord] + [state + 1] + coordinates[coord+1:])
                 if state - 1 >= 0:
-                    res.append(coords[:coord] + [state - 1] + coords[coord+1:])
+                    res.append(coordinates[:coord] + [state - 1] + coordinates[coord+1:])
             return res
 
         current_coord = [0 for _ in range(self.dim)]
 
         def increment_coord(ind):
-            if current_coord[ind] + 1 == self.l:
+            if current_coord[ind] + 1 == self.el_in_dim:
                 current_coord[ind] = 0
                 increment_coord(ind - 1)
             else:
@@ -38,27 +38,27 @@ class System:
             increment_coord(len(current_coord) - 1)
             neighbours = [System.get(self.system, c) for c in get_neighbours(current_coord)]
 
-            sum = 0
+            delta_u = 0
             current_state = System.get(self.system, current_coord)
-            for state in [-1, 1]:
-                current_state = -1 * state * current_state
+            for state_operator in [1, -1]:
+                current_state = state_operator * current_state
                 for neighbour in neighbours:
-                    sum += state * (neighbour * current_state * -1)
+                    delta_u += state_operator * (neighbour * current_state)
 
-            if sum <= 0 or System.pdf():
+            if delta_u <= 0 or System.pdf():
                 System.set(self.system, current_coord, current_state)
 
     @staticmethod
-    def get(system, coords):
-        if len(coords) == 1:
-            return system[coords[0]]
-        return get(system[coords[0], coords[1:]])
+    def get(system, coordinates):
+        if len(coordinates) == 1:
+            return system[coordinates[0]]
+        return System.get(system[coordinates[0]], coordinates[1:])
 
     @staticmethod
-    def set(system, coords, value):
-        if len(coords) == 1:
-            system[coords[0]] = value
-        get(system[coords[0], coords[1:]])
+    def set(system, coordinates, value):
+        if len(coordinates) == 1:
+            system[coordinates[0]] = value
+        System.set(system[coordinates[0]], coordinates[1:], value)
 
     @staticmethod
     def pdf():
@@ -72,8 +72,8 @@ if __name__ == '__main__':
     DIMENSIONS = 3
     L = 2
 
-    system = System(L, DIMENSIONS)
+    SYSTEM = System(L, DIMENSIONS)
 
-    print(system)
+    print(SYSTEM)
 
-    system.simulate()
+    SYSTEM.simulate()
